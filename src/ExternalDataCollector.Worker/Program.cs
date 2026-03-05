@@ -27,7 +27,6 @@ builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlite(cs));
 builder.Services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 
-// HttpClient + Resiliência (retry com backoff + jitter, trata 5xx/408/429 e falhas de rede)
 static IAsyncPolicy<HttpResponseMessage> CreatePolicy()
 {
     var jitter = new Random();
@@ -57,7 +56,6 @@ builder.Services.AddHttpClient("scraper", http =>
 //})
 //.AddPolicyHandler(CreatePolicy());
 
-// Scraper recebe moedas desejadas
 builder.Services.AddTransient<IRateScraper>(sp =>
 {
     var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
@@ -80,15 +78,11 @@ using (var scope = host.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-
-    // Pega o caminho do banco da Connection String
     var connectionString = builder.Configuration.GetConnectionString("Sqlite");
     var dataSource = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString).DataSource;
 
-    // Pega o diretório (ex: "data")
     var directory = Path.GetDirectoryName(dataSource);
 
-    // Se o diretório foi informado e não existe, cria ele
     if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
     {
         Directory.CreateDirectory(directory);

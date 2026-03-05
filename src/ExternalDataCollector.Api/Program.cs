@@ -34,14 +34,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    // Pega o caminho do banco da Connection String
     var connectionString = builder.Configuration.GetConnectionString("Sqlite");
     var dataSource = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString).DataSource;
 
-    // Pega o diretório (ex: "data")
     var directory = Path.GetDirectoryName(dataSource);
 
-    // Se o diretório foi informado e não existe, cria ele
     if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
     {
         Directory.CreateDirectory(directory);
