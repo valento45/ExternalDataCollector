@@ -19,6 +19,8 @@ if (string.IsNullOrWhiteSpace(cs))
     cs = $"Data Source={dbPath}";
 }
 
+builder.Services.AddControllers();
+
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlite(cs));
 
 builder.Services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
@@ -52,35 +54,8 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapControllers();
 
-app.MapGet("/api/rates/latest", async (string? quote, int? take, GetLatestRates uc, CancellationToken ct) =>
-{
-    var data = await uc.ExecuteAsync(quote, take ?? 50, ct);
-    return Results.Ok(data.Select(x => new
-    {
-        x.BaseCurrency,
-        x.QuoteCurrency,
-        x.Rate,
-        AsOfDate = x.AsOfDate.ToString("yyyy-MM-dd"),
-        x.RetrievedAt
-    }));
-});
-
-app.MapGet("/api/rates", async (string date, string? quote, int? take, GetLatestRates uc, CancellationToken ct) =>
-{
-    if (!DateOnly.TryParse(date, out var d))
-        return Results.BadRequest(new { error = "Parâmetro 'date' inválido. Use yyyy-MM-dd." });
-
-    var data = await uc.ExecuteByDateAsync(d, quote, take ?? 50, ct);
-    return Results.Ok(data.Select(x => new
-    {
-        x.BaseCurrency,
-        x.QuoteCurrency,
-        x.Rate,
-        AsOfDate = x.AsOfDate.ToString("yyyy-MM-dd"),
-        x.RetrievedAt
-    }));
-});
+app.MapGet("/healthcheck", () => Results.Ok(new { status = "ok" }));
 
 app.Run();
