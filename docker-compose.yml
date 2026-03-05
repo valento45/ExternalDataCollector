@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/ExternalDataCollector.Api/Dockerfile
+    container_name: external-data-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ConnectionStrings__Sqlite=Data Source=/app/data/rates.db
+    volumes:
+      - data:/app/data
+    depends_on:
+      - worker
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/ExternalDataCollector.Worker/Dockerfile
+    container_name: external-data-worker
+    environment:
+      - ConnectionStrings__Sqlite=Data Source=/app/data/rates.db
+      - Scraping__IntervalSeconds=300
+      - Scraping__WantedQuotes__0=USD
+      - Scraping__WantedQuotes__1=BRL
+      - Scraping__WantedQuotes__2=GBP
+    volumes:
+      - data:/app/data
+
+volumes:
+  data:
