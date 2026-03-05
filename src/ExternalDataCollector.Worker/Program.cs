@@ -1,5 +1,6 @@
 using ExternalDataCollector.Application.Abstractions;
 using ExternalDataCollector.Application.UseCases;
+using ExternalDataCollector.Infrastructure;
 using ExternalDataCollector.Infrastructure.Data;
 using ExternalDataCollector.Infrastructure.Scraping;
 using ExternalDataCollector.Infrastructure.Time;
@@ -12,8 +13,15 @@ using System.Net.Http.Headers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var cs = builder.Configuration.GetConnectionString("Sqlite")
-         ?? "Data Source=/app/data/rates.db";
+var cs = builder.Configuration.GetConnectionString("Sqlite");
+
+
+if (string.IsNullOrWhiteSpace(cs))
+{
+    var dbPath = SqlitePath.GetDefaultDbPath();
+    cs = $"Data Source={dbPath}";
+}
+
 
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlite(cs));
 builder.Services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
