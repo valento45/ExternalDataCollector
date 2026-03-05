@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+
+# Rider / VSCode
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite local (se rodar fora do docker)
+*.db
+*.db-shm
+*.db-wal
+/.vs/ExternalDataCollector
